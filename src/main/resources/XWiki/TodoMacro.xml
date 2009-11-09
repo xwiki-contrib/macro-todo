@@ -1,0 +1,663 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>XWiki</web>
+<name>TodoMacro</name>
+<language></language>
+<defaultLanguage></defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.LudovicDubost</creator>
+<author>xwiki:XWiki.LudovicDubost</author>
+<customClass></customClass>
+<contentAuthor>xwiki:XWiki.LudovicDubost</contentAuthor>
+<creationDate>1254508459000</creationDate>
+<date>1255895543000</date>
+<contentUpdateDate>1255895543000</contentUpdateDate>
+<version>61.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.JavaScriptExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>onDemand=On demand|always=Always</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>XWiki.TodoMacro</name>
+<number>0</number>
+<className>XWiki.JavaScriptExtension</className>
+<guid>a160d190-3381-415c-95dc-af65f95103d5</guid>
+<property>
+<cache>default</cache>
+</property>
+<property>
+<code>function todo_edit(page, counter, hashcode, divid) {
+ if (divid&lt;0)
+  divid = - divid;
+ var editor = $("todo-" + divid + "-editor");
+ if (editor.style.display == "block") {
+   editor.style.display = "none";
+ } else {
+   var form = $("todo-" + divid + "-form");
+   form.page = page;
+   form.counter = counter;
+   // only set the hashcode if it was not set
+   // as it could be different now after a first update
+   if (!form.hashcode)
+    form.hashcode = "" + hashcode;
+   editor.style.display = "block";
+ }
+}
+
+function todo_markdone(page, counter, hashcode, divid) {
+ var form = $("todo-" + divid + "-form");
+ form.status.value = "resolved";
+ form.page = page;
+ form.counter = counter;
+ // only set the hashcode if it was not set
+ // as it could be different now after a first update
+ if (!form.hashcode)
+   form.hashcode = "" + hashcode;
+ todo_changestatus("resolved", form.priority.value, form.todo.value, page, counter, form.hashcode, divid);
+}
+
+function todo_changestatus(status, priority, content, page, counter, hashcode, divid) {
+ $("todo-" + divid + "-editor").style.display = "none";
+
+ // ready to change the status on the server now
+ $("todo-" + divid + "-message").style.display = "none";
+ $("todo-" + divid + "-message").innerHTML = "Updating todo status...";
+ var url = "$xwiki.getURL("XWiki.TodoMacroService")";
+ var ajx = new Ajax.Request(url, {
+     method: "post",
+     parameters: { xpage : "plain", outputSyntax : "plain", page : page, counter : counter,
+                          status :  status, priority : priority, content : content, hashcode : hashcode },
+     onComplete: function(transport) {
+          $("todo-" + divid + "-message").innerHTML = "Todo status result: " + transport.responseText;
+          if (transport.responseText.indexOf("FAILED")==-1) {
+                $("todo-" + divid + "-status").innerHTML = status;
+                $("todo-" + divid).className = "todo todo-" + status + " todo-" + priority;
+                $("todo-" + divid + "-buttons").className = "todo-buttons todo-" + status;
+                $("todo-" + divid + "-content").innerHTML = content;
+                var form = $("todo-" + divid + "-form");
+                var res = transport.responseText;
+                form.hashcode = res.substring(8).trim();
+                // alert(form.hashcode);
+          } else {
+            alert("Update failed");
+          }
+     }
+ });
+}</code>
+</property>
+<property>
+<name>Todo JS</name>
+</property>
+<property>
+<parse>1</parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.StyleSheetExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>onDemand=On demand|always=Always</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>XWiki.TodoMacro</name>
+<number>0</number>
+<className>XWiki.StyleSheetExtension</className>
+<guid>41830f09-bfba-47cb-ac17-2169c1f33494</guid>
+<property>
+<cache>default</cache>
+</property>
+<property>
+<code>.todo-resolved .todo-content, .todo-cancelled .todo-content {
+ text-decoration:line-through;
+}
+
+.todo-resolved .todo-markdone {
+ display: none;
+}
+
+.todo-low .todo-status {
+ background-color: none;
+ text-color: black;
+}
+
+.todo-normal .todo-status {
+ text-color: black;
+ background-color: yellow;
+}
+
+.todo-high .todo-status {
+ text-color: black;
+ background-color: red;
+}
+
+.todo {
+ padding-top: 0px;
+ padding-bottom: 2px;
+ padding-left: 2px;
+ padding-right: 2px;
+}
+
+.todo-form {
+ width: 500px;
+ margin-top: 10px;
+ margin-bottom: 10px;
+ padding: 6px;
+ border: 1px solid grey;
+}
+
+.todo-form form {
+ width: auto;
+}
+</code></property><property><name></name></property><property><parse>0</parse>
+</property>
+<property>
+<use>onDemand</use>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.TagClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<tags>
+<cache>0</cache>
+<displayType>input</displayType>
+<multiSelect>1</multiSelect>
+<name>tags</name>
+<number>1</number>
+<prettyName>Tags</prettyName>
+<relationalStorage>1</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<values></values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</tags>
+</class>
+<name>XWiki.TodoMacro</name>
+<number>0</number>
+<className>XWiki.TagClass</className>
+<guid>ede86023-b00a-4686-a938-851a0e72d2db</guid>
+<property>
+<tags/>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<code>
+<name>code</name>
+<number>8</number>
+<prettyName>Macro code</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<contentDescription>
+<name>contentDescription</name>
+<number>7</number>
+<prettyName>Content description (Not applicable for "No content" type)</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</contentDescription>
+<contentType>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>contentType</name>
+<number>6</number>
+<prettyName>Macro content type</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator>|</separator>
+<separators>|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>Mandatory|Optional|No content</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</contentType>
+<defaultCategory>
+<name>defaultCategory</name>
+<number>4</number>
+<prettyName>Default category</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultCategory>
+<description>
+<name>description</name>
+<number>3</number>
+<prettyName>Macro description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<id>
+<name>id</name>
+<number>1</number>
+<prettyName>Macro id</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</id>
+<name>
+<name>name</name>
+<number>2</number>
+<prettyName>Macro name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<supportsInlineMode>
+<displayFormType>select</displayFormType>
+<displayType>select</displayType>
+<name>supportsInlineMode</name>
+<number>5</number>
+<prettyName>Supports inline mode</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</supportsInlineMode>
+</class>
+<name>XWiki.TodoMacro</name>
+<number>0</number>
+<className>XWiki.WikiMacroClass</className>
+<guid>3f28e53f-3a39-48db-b61d-383f3502758f</guid>
+<property>
+<code>{{velocity}}
+#if(!$request.hide || ($xcontext.macro.params.status != "resolved" &amp;&amp; $xcontext.macro.params.status != "cancelled"))
+{{html clean="false" wiki="true"}}
+#set($ok = $xwiki.jsx.use("XWiki.TodoMacro"))
+#set($ok = $xwiki.ssx.use("XWiki.TodoMacro"))
+#if($todocounter)
+#set($todocounter = $todocounter + 1)
+#else
+#set($todocounter = 1)
+#end
+#set($status = $xcontext.macro.params.status)
+#if(!$status)
+ #set($status = "open")
+#end
+#set($priority = $xcontext.macro.params.priority)
+#if(!$priority)
+ #set($priority = "normal")
+#end
+#set($assignee = $xcontext.macro.params.assignee)
+#if($assignee &amp;&amp; $assignee!="")
+ #set($sassignee = $xwiki.getUserName($assignee))
+#end
+#set($str = "$!{xcontext.macro.params.status}-$!{xcontext.macro.params.priority}-$!{xcontext.macro.params.assignee}-$!{xcontext.macro.content}")
+#set($hashcode = $str.trim().hashCode())
+#if($hashcode &lt; 0)
+#set($divid = 0 - $hashcode)
+#else
+#set($divid = $hashcode)
+#end
+{{html clean="false"}}
+&lt;li id="todo-${divid}-anchor" &gt;&lt;span id="todo-${divid}" class="todo todo-${status} todo-${priority}" title="Task assigned to: $!{assignee}."&gt;
+&lt;a name="toto-${divid}-anchor"&gt;&lt;/a&gt;
+&lt;span id="todo-${divid}-status" class="todo-status"&gt;$!{status}&lt;/span&gt;: 
+&lt;span id="todo-${divid}-content" class="todo-content"&gt;
+{{/html}}
+$xcontext.macro.content
+{{html clean="false"}}
+&lt;/span&gt;
+&lt;/span&gt;
+&lt;span id="todo-${divid}-buttons" class="todo-buttons todo-${status}"&gt;
+&lt;a class="todo-edit" href="javascript:void(0)" onclick="todo_edit('${doc.fullName}', $todocounter, $hashcode, $divid); return false;"&gt;&lt;img src="$xwiki.getSkinFile("icons/silk/pencil_add.gif")" alt="edit" /&gt;&lt;/a&gt;
+&lt;a class="todo-markdone" href="javascript:void(0)" onclick="todo_markdone('${doc.fullName}', $todocounter, $hashcode, $divid); return false;"&gt;&lt;img src="$xwiki.getSkinFile("icons/silk/tick.gif")" alt="edit" /&gt;&lt;/a&gt;
+&lt;/span&gt;
+&lt;span id="todo-${divid}-message" class="todo-message" style="display: none"&gt;Loading...&lt;/span&gt;
+&lt;span id="todo-${divid}-editor" class="todo-form" style="display: none"&gt;&lt;form id="todo-${divid}-form"&gt;
+#set($data = $xwiki.getFormEncoded($xcontext.macro.content))
+Todo: &lt;input id="todo" type="text" value="${data}" size="80" /&gt;
+&lt;br /&gt;
+Status: &lt;select id='status'&gt;
+#foreach($st in ["open","resolved"])
+&lt;option value="${st}" #if($st==$status) selected #end &gt;$st&lt;/option&gt;
+#end
+&lt;/select&gt;
+Priority: &lt;select id='priority'&gt;
+#foreach($pr in ["low", "normal", "high"])
+&lt;option value="${pr}" #if($pr==$priority) selected #end &gt;$pr&lt;/option&gt;
+#end
+&lt;/select&gt;
+&lt;input type="button" value="Change status" onclick="todo_changestatus(this.form.status.value, this.form.priority.value, this.form.todo.value, this.form.page, this.form.counter, this.form.hashcode, $divid)" /&gt;
+&lt;/form&gt;
+&lt;/span&gt;
+&lt;/li&gt;
+{{/html}}
+{{/html}}
+#end
+{{/velocity}}</code>
+</property>
+<property>
+<contentDescription>Todo</contentDescription>
+</property>
+<property>
+<contentType>Mandatory</contentType>
+</property>
+<property>
+<defaultCategory>content</defaultCategory>
+</property>
+<property>
+<description>TODO Macro</description>
+</property>
+<property>
+<id>todo</id>
+</property>
+<property>
+<name>todo</name>
+</property>
+<property>
+<supportsInlineMode>1</supportsInlineMode>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<description>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<displayFormType>select</displayFormType>
+<displayType>select</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.TodoMacro</name>
+<number>0</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>5f056d62-7473-4868-8d0c-d21a22cc5b5e</guid>
+<property>
+<description>Enter the assignee</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>assignee</name>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<description>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<displayFormType>select</displayFormType>
+<displayType>select</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.TodoMacro</name>
+<number>1</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>191593f9-a573-48d0-8a97-f8c524866e51</guid>
+<property>
+<description>Enter the status</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>status</name>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<description>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<displayFormType>select</displayFormType>
+<displayType>select</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.TodoMacro</name>
+<number>2</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>c45f8192-a993-4152-a77c-d003971f8cc3</guid>
+<property>
+<description>Priority</description>
+</property>
+<property>
+<mandatory></mandatory>
+</property>
+<property>
+<name>priority</name>
+</property>
+</object>
+<content>= TODO Macro =
+
+* Visit [[the install page&gt;&gt;XWiki.TodoMacroInstall]] to finish the installation.
+* Visit the [[demo pages&gt;&gt;Todo.WebHome]] for sample pages with todos.</content>
+</xwikidoc>

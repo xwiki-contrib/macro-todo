@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xwikidoc>
+<web>XWiki</web>
+<name>TodoListMacro</name>
+<language></language>
+<defaultLanguage></defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>XWiki.LudovicDubost</creator>
+<author>xwiki:XWiki.LudovicDubost</author>
+<customClass></customClass>
+<contentAuthor>xwiki:XWiki.LudovicDubost</contentAuthor>
+<creationDate>1255120825000</creationDate>
+<date>1255895598000</date>
+<contentUpdateDate>1255895598000</contentUpdateDate>
+<version>10.1</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>false</minorEdit>
+<syntaxId>xwiki/2.0</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.WikiMacroClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<code>
+<name>code</name>
+<number>8</number>
+<prettyName>Macro code</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<contentDescription>
+<name>contentDescription</name>
+<number>7</number>
+<prettyName>Content description (Not applicable for "No content" type)</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</contentDescription>
+<contentType>
+<cache>0</cache>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>contentType</name>
+<number>6</number>
+<prettyName>Macro content type</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator>|</separator>
+<separators>|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>Mandatory|Optional|No content</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</contentType>
+<defaultCategory>
+<name>defaultCategory</name>
+<number>4</number>
+<prettyName>Default category</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</defaultCategory>
+<description>
+<name>description</name>
+<number>3</number>
+<prettyName>Macro description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<id>
+<name>id</name>
+<number>1</number>
+<prettyName>Macro id</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</id>
+<name>
+<name>name</name>
+<number>2</number>
+<prettyName>Macro name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<supportsInlineMode>
+<displayFormType>select</displayFormType>
+<displayType>select</displayType>
+<name>supportsInlineMode</name>
+<number>5</number>
+<prettyName>Supports inline mode</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</supportsInlineMode>
+</class>
+<name>XWiki.TodoListMacro</name>
+<number>0</number>
+<className>XWiki.WikiMacroClass</className>
+<guid>b88ecaac-9dde-404a-addd-ff5ca81f6f08</guid>
+<property>
+<code>{{velocity}}
+#set($todog = $xwiki.parseGroovyFromPage("XWiki.TodoMacroGroovy"))
+#set($ok = $todog.setContext($context, $xwiki))
+#if($xcontext.macro.params.space &amp;&amp; $xcontext.macro.params.space!="")
+ #set($spacesql = " and doc.web = '${xcontext.macro.params.space}' ")
+#else
+ #set($spacesql = " ")
+#end
+#set($list = $xwiki.searchDocuments("where doc.content like '%{{todo %' and doc.name&lt;&gt;'TodoMacroGroovy' ${spacesql}"))
+#set($list2 = $xwiki.searchDocuments(", BaseObject as obj, LargeStringProperty as prop where doc.fullName=obj.name and obj.id=prop.id.id and prop.value like '%{{todo %' and doc.name&lt;&gt;'TodoListMacro' and doc.name&lt;&gt;'TodoMacroGroovy' ${spacesql}"))
+#foreach($item in $list2) 
+#if(!$list.contains($item))
+ #set($ok = $list.add($item))
+#end
+#end
+#foreach($item in $list)
+#set($itemdoc = $xwiki.getDocument($item))
+* [[$itemdoc.displayTitle&gt;&gt;$item]]
+#foreach($todo in $todog.getTodos($itemdoc))
+** $todo.status: $todo.content #if($todo.assignee &amp;&amp; $todo.assignee!="")- $todo.assignee - [[Go&gt;&gt;${item}#todo-${todo.divid}-anchor]]#end
+
+#end
+#end
+</code></property><property><contentDescription></contentDescription></property><property><contentType>No content</contentType>
+</property>
+<property>
+<defaultCategory>content</defaultCategory>
+</property>
+<property>
+<description>This allows to list all the todos in a space or in the Wiki</description>
+</property>
+<property>
+<id>todolist</id>
+</property>
+<property>
+<name>Todo List</name>
+</property>
+<property>
+<supportsInlineMode>0</supportsInlineMode>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.WikiMacroParameterClass</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<description>
+<name>description</name>
+<number>2</number>
+<prettyName>Parameter description</prettyName>
+<rows>5</rows>
+<size>40</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</description>
+<mandatory>
+<displayFormType>select</displayFormType>
+<displayType>select</displayType>
+<name>mandatory</name>
+<number>3</number>
+<prettyName>Parameter mandatory</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</mandatory>
+<name>
+<name>name</name>
+<number>1</number>
+<prettyName>Parameter name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+</class>
+<name>XWiki.TodoListMacro</name>
+<number>0</number>
+<className>XWiki.WikiMacroParameterClass</className>
+<guid>057f0955-acf0-4652-97a6-55a91326fcc4</guid>
+<property>
+<description>Optional space to limit the todo list to</description>
+</property>
+<property>
+<mandatory>0</mandatory>
+</property>
+<property>
+<name>space</name>
+</property>
+</object>
+<content>
+</content></xwikidoc>
