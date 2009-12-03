@@ -1,15 +1,19 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <parent>
-    <artifactId>xwiki-applications</artifactId>
-    <groupId>com.xpn.xwiki.platform.applications</groupId>
-    <version>15</version>
-  </parent>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.xpn.xwiki.platform.applications</groupId>
+  <groupId>org.xwiki.contrib</groupId>
   <artifactId>xwiki-macro-todo</artifactId>
   <packaging>xar</packaging>
   <name>XWiki Platform - Macro - TODO Macro</name>
   <version>1.0-SNAPSHOT</version>
   <description>Macro for in page todos</description>
+  <build>
+    <extensions>
+      <extension>
+        <groupId>org.xwiki.platform.tools</groupId>
+        <artifactId>xwiki-xar-handlers</artifactId>
+        <version>1.9</version>
+      </extension>
+    </extensions>
+  </build>  
 </project>
 
