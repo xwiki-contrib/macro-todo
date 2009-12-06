@@ -3,7 +3,7 @@
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>xwiki-macro-todo</artifactId>
   <packaging>xar</packaging>
-  <name>XWiki Platform - Macro - TODO Macro</name>
+  <name>Contrib - Macro - TODO Macro</name>
   <version>1.0-SNAPSHOT</version>
   <description>Macro for in page todos</description>
   <build>
